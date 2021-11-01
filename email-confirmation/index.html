@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Confirmation</title>
+  </head>
+  <body>
+    <h1 id="title">Loading...</h1>
+    <p id="message">
+      Please wait while we confirm your email address. Thank you!
+    </p>
+  </body>
+</html>
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get("id");
+  const token = urlParams.get("token");
+
+  const title = document.getElementById("title");
+  const message = document.getElementById("message");
+
+  const confirmEmail = async () => {
+    try {
+      let response = await fetch(
+        "http://localhost:8080/api/user/verify-email",
+        // "https://fitshare-api.herokuapp.com/api/user/verify-email",
+        {
+          method: "PUT",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token,
+            id,
+          }),
+        }
+      );
+      let json = await response.json();
+
+      if (json.message.includes("SUCCESS")) {
+        title.innerHTML = "Success!";
+        message.innerHTML = json.message;
+      } else {
+        title.innerHTML = "Error";
+        message.innerHTML = json.message;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  if (!id || !token) {
+    title.innerHTML = "Invalid Link";
+    message.innerHTML =
+      "Please paste the whole link into the browser or request a new link in the app.";
+  } else {
+    confirmEmail();
+  }
+</script>
